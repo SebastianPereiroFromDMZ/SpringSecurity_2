@@ -18,4 +18,6 @@ public interface PersonRepository extends JpaRepository<Person, PersonPrimaryKey
     Optional<Person> findByPersonPrimaryKey_Age (int age);
 
     Optional<Person> findByPersonPrimaryKey_NameAndPersonPrimaryKey_Surname (String name, String surname);
+
+    Optional<Person> findByPersonPrimaryKey_Name (String name);
 }

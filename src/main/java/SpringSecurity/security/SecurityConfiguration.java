@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -21,6 +23,19 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @Configuration
 @AllArgsConstructor
+
+/*
+@EnableGlobalMethodSecurity в спрингБуте с 3 версии устаревший!
+
+@EnableMethodSecurity на замену
+Обратите внимание, что вы можете избежать использования prePostEnabled = true, поскольку по умолчанию используется true.
+
+boolean prePostEnabled() default true;
+boolean jsr250Enabled() default false;
+boolean proxyTargetClass() default false;
+ */
+
+@EnableMethodSecurity(proxyTargetClass = true, jsr250Enabled = true, securedEnabled = true)
 public class SecurityConfiguration {
 
     @Bean
@@ -30,35 +45,21 @@ public class SecurityConfiguration {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        http.formLogin(Customizer.withDefaults())
-                .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/persons/by-city").permitAll()
-                        .requestMatchers("/persons/by-age:{age}").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers("/persons/by-name-and-surname").hasAnyRole("ADMIN")
-                        .anyRequest().authenticated());
-
-
-        return http.build();
-    }
-
-    @Bean
     public UserDetailsService users() {
         UserDetails admin = User.builder()
-                .username("Admin")
+                .username("Nikola")
                 .password(encoder().encode("password"))
-                .roles("ADMIN")
+                .roles("READ", "WRITE", "DELETE")
                 .build();
         UserDetails firstUser = User.builder()
                 .username("First")
                 .password(encoder().encode("passwordFirst"))
-                .roles("USER")
+                .roles("WRITE")
                 .build();
         UserDetails secondUser = User.builder()
                 .username("Second")
                 .password(encoder().encode("passwordSecond"))
-                .roles("USER")
+                .roles("DELETE")
                 .build();
 
         return new InMemoryUserDetailsManager(admin, firstUser, secondUser);
